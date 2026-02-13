@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Special Greeting</title>
+    <style>
+        :root {
+            --bg-beige: #f5f5dc;
+            --dark-beige: #d2b48c;
+            --paper-white: #fffcf7; 
+            --text-coffee: #4a3728;
+            --accent-warm: #bc8f8f;
+        }
+
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--bg-beige);
+            background-image: radial-gradient(var(--dark-beige) 0.5px, transparent 0.5px);
+            background-size: 20px 20px;
+            font-family: 'Georgia', serif;
+            overflow: hidden;
+            color: var(--text-coffee);
+        }
+
+        #selection-screen {
+            text-align: center;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .choice-card {
+            background: rgba(255, 255, 255, 0.6);
+            padding: 18px 30px;
+            border-radius: 15px;
+            border: 1px solid var(--dark-beige);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 4px 4px 10px rgba(0,0,0,0.03);
+        }
+
+        .choice-card:hover {
+            background: var(--paper-white);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.08);
+        }
+
+        .letter-container {
+            display: none;
+            position: relative;
+            width: 85%;
+            max-width: 450px;
+            background: var(--paper-white);
+            padding: 50px 40px;
+            box-shadow: 20px 20px 60px #cfcfbb;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid var(--dark-beige);
+            z-index: 30;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+
+        h1 { font-size: 1.3rem; font-weight: normal; letter-spacing: 3px; border-bottom: 1px solid var(--bg-beige); padding-bottom: 15px; margin-top: 0; }
+        
+        /* General message styling */
+        .message { 
+            line-height: 1.8; 
+            font-size: 1.05rem; 
+            margin-top: 25px; 
+            text-align: center;
+        }
+
+        /* Specifically for the lyrics inside the message */
+        .lyrics {
+            font-family: 'Courier New', Courier, monospace;
+            display: block;
+            margin: 20px 0;
+            font-size: 1rem;
+            text-align: left;
+            background: rgba(210, 180, 140, 0.1);
+            padding: 15px;
+            border-radius: 4px;
+        }
+
+        .signature { margin-top: 40px; font-size: 0.9rem; color: var(--accent-warm); }
+
+        .back-btn {
+            margin-top: 25px;
+            background: none;
+            border: 1px solid var(--dark-beige);
+            color: var(--text-coffee);
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            opacity: 0.6;
+            transition: 0.3s;
+        }
+
+        .back-btn:hover { opacity: 1; background: var(--bg-beige); }
+
+        .petal {
+            position: absolute;
+            background-color: var(--dark-beige);
+            border-radius: 150% 0 150% 0;
+            opacity: 0.2;
+            pointer-events: none;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg); }
+            100% { transform: translateY(110vh) rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="player" loop></audio>
+
+    <div id="selection-screen">
+        <h2 style="font-weight: normal; opacity: 0.7; margin-bottom: 15px;">Pick your status...</h2>
+        
+        <div class="choice-card" onclick="openLetter('single')">
+            <span>☁️</span>
+            <div class="choice-text">If you are single, open this</div>
+        </div>
+
+        <div class="choice-card" onclick="openLetter('taken')">
+            <span>✨</span>
+            <div class="choice-text">If you are taken, open this</div>
+        </div>
+
+        <div class="choice-card" onclick="openLetter('complicated')">
+            <span>🌙</span>
+            <div class="choice-text">If it's complicated, open this</div>
+        </div>
+    </div>
+
+    <div id="letter" class="letter-container">
+        <h1 id="letter-title"></h1>
+        <div id="letter-message" class="message"></div>
+        <div class="signature">with love, <br> <strong>Eloisa</strong></div>
+        <button class="back-btn" onclick="goBack()">← change status</button>
+    </div>
+
+    <script>
+        const player = document.getElementById('player');
+
+        const content = {
+            single: {
+                title: "I'M SINGLE",
+                intro: "If no one has greeted you yet, here it is!",
+                lyrics: "It's gonna hurt for a bit of time So bottoms up,\nlet's forget tonight\nYou'll find another and you'll be just fine, let her go\nIt'll be alright",
+                outro: "God has something better for yah\nHappy Hearts Day, Friend! ♡",
+                song: "single_song.mp3" 
+            },
+            taken: {
+                title: "YUH SO IN LOVE",
+                intro: "If no one has greeted you yet, here it is!",
+                lyrics: "But when it hurts, I can make it better\nGirl, if it works, it's gon' be forever\nWe been through the worst, made it through the weather\nOur problems and the pain, pain, but love, don't change",
+                outro: "Don't take what you have for granted, okuurrr?\nHappy Hearts Day, Friend! ♡",
+                song: "taken_song.mp3" 
+            },
+            complicated: {
+                title: "UGH IT'S COMPLICATED",
+                intro: "If no one has greeted you yet, here it is!",
+                lyrics: "Maybe I’m just not better than this I haven’t tried\nMaybe life’s less romantic when I don’t wanna die\nYou’d think I’d be a fast learner\nBut guess I won’t ever mind crisping up on your backburner",
+                outro: "All is gonna be alright! haha\nHappy Hearts Day, Friend! ♡",
+                song: "complicated_song.mp3" 
+            }
+        };
+
+        function openLetter(status) {
+            player.src = content[status].song;
+            player.play().catch(e => console.log("Audio play blocked. Ensure mp3 filenames match."));
+
+            document.getElementById('selection-screen').style.display = 'none';
+            const letter = document.getElementById('letter');
+            letter.style.display = 'block';
+
+            document.getElementById('letter-title').innerText = content[status].title;
+            
+            // Build the message with different fonts
+            document.getElementById('letter-message').innerHTML = `
+                <div>${content[status].intro}</div>
+                <div class="lyrics">${content[status].lyrics.replace(/\n/g, '<br>')}</div>
+                <div style="white-space: pre-line;">${content[status].outro}</div>
+            `;
+        }
+
+        function goBack() {
+            player.pause();
+            document.getElementById('selection-screen').style.display = 'flex';
+            document.getElementById('letter').style.display = 'none';
+        }
+
+        function createPetal() {
+            const petal = document.createElement('div');
+            petal.classList.add('petal');
+            petal.style.width = Math.random() * 10 + 5 + 'px';
+            petal.style.height = petal.style.width;
+            petal.style.left = Math.random() * 100 + 'vw';
+            petal.style.animationDuration = Math.random() * 5 + 5 + 's';
+            petal.style.backgroundColor = ['#d2b48c', '#e5d3b3', '#bc8f8f'][Math.floor(Math.random()*3)];
+            document.body.appendChild(petal);
+            setTimeout(() => petal.remove(), 8000);
+        }
+        setInterval(createPetal, 700);
+    </script>
+</body>
+</html>
